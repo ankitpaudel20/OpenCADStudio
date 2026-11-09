@@ -15,6 +15,7 @@ makedepends=('cargo' 'git' 'pkgconf')
 options=('!lto')
 source=()
 pkgver=0
+pkgrel=1
 _root="$(realpath "$startdir/../..")"
 
 pkgver() {
