@@ -1,0 +1,37 @@
+name: Arch package
+
+# Manual only: Actions tab -> "Arch package" -> Run workflow.
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: Branch, tag or commit to build
+        default: main
+
+jobs:
+  pacman:
+    runs-on: ubuntu-latest
+    container: archlinux:base-devel
+    steps:
+      - name: Install tools
+        run: pacman -Syu --noconfirm --needed git sudo cargo
+
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+          fetch-depth: 0 # build.rs measures git distance from the release tag
+
+      - name: Build package
+        run: |
+          useradd -m builder
+          echo 'builder ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/builder
+          git config --system --add safe.directory '*'
+          chown -R builder .
+          cd packaging/arch
+          sudo -u builder makepkg --syncdeps --noconfirm --force
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: opencadstudio-pacman
+          path: packaging/arch/*.pkg.tar.zst
+          if-no-files-found: error
