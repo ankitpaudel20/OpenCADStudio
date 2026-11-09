@@ -26,12 +26,15 @@ jobs:
           useradd -m builder
           echo 'builder ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/builder
           git config --system --add safe.directory '*'
-          chown -R builder .
+          mkdir /tmp/build "$GITHUB_WORKSPACE/out"
+          chown -R builder . /tmp/build "$GITHUB_WORKSPACE/out"
           cd packaging/arch
-          sudo -u builder makepkg --syncdeps --noconfirm --force
+          # Keep makepkg's root-only pkg/ dir out of the tree: cargo scans the tree.
+          sudo -u builder env BUILDDIR=/tmp/build PKGDEST="$GITHUB_WORKSPACE/out" \
+            makepkg --syncdeps --noconfirm --force
 
       - uses: actions/upload-artifact@v4
         with:
           name: opencadstudio-pacman
-          path: packaging/arch/*.pkg.tar.zst
+          path: out/*.pkg.tar.zst
           if-no-files-found: error
