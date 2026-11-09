@@ -12,7 +12,7 @@ depends=('gcc-libs' 'glibc' 'fontconfig' 'freetype2' 'libglvnd' 'vulkan-icd-load
 optdepends=('xdg-desktop-portal: native file dialogs'
             'vulkan-driver: GPU rendering')
 makedepends=('cargo' 'git' 'pkgconf')
-options=('!lto')
+options=('!lto' '!debug') # makepkg's debug flags (-Cdebuginfo=2) make rustc OOM on a 7 GB runner
 source=()
 pkgver=0
 pkgrel=1
